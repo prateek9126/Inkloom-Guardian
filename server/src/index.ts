@@ -1,7 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
+import { rateLimit } from 'express-rate-limit';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
@@ -95,6 +95,31 @@ app.use('/api/auth/register', authLimiter);
 app.use(express.json({ limit: '15mb' }));
 app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 
+// Lazy / eager service initialization for serverless and standalone environments
+let initPromise: Promise<void> | null = null;
+export async function initializeServices(): Promise<void> {
+  if (!initPromise) {
+    initPromise = (async () => {
+      console.log('[Inkloom Guardian] Initializing backend services...');
+      await db.ensureReady();
+      await runMigrations();
+      // Auto-seed demo data if DB is empty
+      await seedDatabase(false);
+    })();
+  }
+  return initPromise;
+}
+
+// Ensure database and services are initialized before processing any requests (essential for Vercel Serverless)
+app.use(async (_req: Request, _res: Response, next: NextFunction) => {
+  try {
+    await initializeServices();
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
+
 // Serve uploaded attachments safely with security headers
 app.use(
   '/uploads',
@@ -178,15 +203,10 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   });
 });
 
-// Start Server
-async function startServer() {
+// Start Server for standalone / local environments (skipped on Vercel Serverless)
+export async function startServer(): Promise<void> {
   try {
-    console.log('[Inkloom Guardian] Initializing backend services...');
-    await db.ensureReady();
-    await runMigrations();
-    // Auto-seed demo data if DB is empty
-    await seedDatabase(false);
-
+    await initializeServices();
     app.listen(config.port, () => {
       console.log(`[Inkloom Guardian API] Server running on http://localhost:${config.port}`);
       console.log(`[Inkloom Guardian API] Database engine: ${db.getEngineType()}`);
@@ -198,4 +218,16 @@ async function startServer() {
   }
 }
 
-startServer();
+// Automatically start HTTP listener only when run directly as main entrypoint and NOT in Vercel Serverless
+const isDirectRun =
+  process.argv[1] &&
+  (process.argv[1].endsWith('index.ts') || process.argv[1].endsWith('index.js')) &&
+  !process.argv[1].includes('test') &&
+  !process.argv[1].includes('verify');
+
+if (!process.env.VERCEL && process.env.NODE_ENV !== 'test' && isDirectRun) {
+  startServer();
+}
+
+export { app };
+export default app;

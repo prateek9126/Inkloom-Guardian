@@ -16,7 +16,9 @@ export const config = {
     model: process.env.LLM_MODEL || 'default',
   },
   maxUploadSizeMB: parseInt(process.env.MAX_UPLOAD_SIZE_MB || '15', 10),
-  uploadDir: path.resolve(process.cwd(), process.env.UPLOAD_DIR || 'uploads'),
+  uploadDir: process.env.VERCEL
+    ? path.resolve('/tmp', process.env.UPLOAD_DIR || 'uploads')
+    : path.resolve(process.cwd(), process.env.UPLOAD_DIR || 'uploads'),
 };
 
 if (config.nodeEnv === 'production' && config.jwtSecret.includes('default')) {

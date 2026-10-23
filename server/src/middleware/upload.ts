@@ -4,8 +4,12 @@ import fs from 'fs';
 import { Request } from 'express';
 import { config } from '../config/env.js';
 
-if (!fs.existsSync(config.uploadDir)) {
-  fs.mkdirSync(config.uploadDir, { recursive: true });
+try {
+  if (!fs.existsSync(config.uploadDir)) {
+    fs.mkdirSync(config.uploadDir, { recursive: true });
+  }
+} catch (e: any) {
+  console.warn(`[Upload] Notice: Could not create upload directory (${config.uploadDir}):`, e.message);
 }
 
 const storage = multer.diskStorage({
