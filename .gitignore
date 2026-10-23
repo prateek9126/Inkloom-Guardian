@@ -1,8 +1,22 @@
+# Dependencies
 node_modules/
 client/node_modules/
 server/node_modules/
+
+# Production build outputs
 client/dist/
 server/dist/
+
+# Environment files
 .env
 .env.*
 !.env.example
+
+# Runtime uploads & temporary data
+uploads/
+server/uploads/
+data/
+server/data/
+*.log
+.DS_Store
+Thumbs.db

@@ -285,7 +285,7 @@ export class PolicyLearningService {
             RETURNING *`,
             [
               orgId,
-              rule.rule_id.includes('-') ? rule.rule_id : null,
+              rule.rule_id && typeof rule.rule_id === 'string' && rule.rule_id.includes('-') ? rule.rule_id : null,
               `Permit Approved Exception for "${rule.rule_title}"`,
               rule.category,
               `Reviewers have repeatedly documented justifiable exceptions (${rule.exceptions_count} recorded exceptions, ${(
@@ -323,7 +323,7 @@ export class PolicyLearningService {
             RETURNING *`,
             [
               orgId,
-              rule.rule_id.includes('-') ? rule.rule_id : null,
+              rule.rule_id && typeof rule.rule_id === 'string' && rule.rule_id.includes('-') ? rule.rule_id : null,
               `Update Guidance & Clarify Phrasing for "${rule.rule_title}"`,
               rule.category,
               `Reviewers consistently accept proposed corrections (${rule.accepted_corrections_count} accepted, ${rule.acceptance_rate_percent}% rate). Update rule content to incorporate approved phrasing conventions directly into guidance.`,
