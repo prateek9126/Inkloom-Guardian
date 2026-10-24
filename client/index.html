@@ -1,17 +1,324 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Inkloom Guardian - AI-Powered Brand Governance and Content Risk Intelligence Platform" />
-    <title>Inkloom Guardian | Brand Governance & Risk Intelligence</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  </head>
-  <body class="bg-white text-slate-900 antialiased font-sans selection:bg-slate-200 selection:text-slate-900 min-h-screen">
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Inkloom Guardian - AI-Powered Brand Governance and Content Risk Intelligence Platform" />
+  <title>Inkloom Guardian | Brand Governance & Risk Intelligence</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230f172a' stroke-width='2'><path stroke-linecap='round' stroke-linejoin='round' d='M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z'/></svg>" />
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN for Zero-Build Instant Static Serving -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            slate: {
+              50: '#f8fafc',
+              100: '#f1f5f9',
+              200: '#e2e8f0',
+              300: '#cbd5e1',
+              400: '#94a3b8',
+              500: '#64748b',
+              600: '#475569',
+              700: '#334155',
+              800: '#1e293b',
+              900: '#0f172a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="stylesheet" href="css/custom.css" />
+</head>
+<body class="bg-slate-50 text-slate-900 antialiased font-sans selection:bg-slate-200 selection:text-slate-900 min-h-screen flex flex-col">
+
+  <!-- Notification Toasts Container -->
+  <div id="toast-container"></div>
+
+  <!-- Dynamic Modal Backdrops Container -->
+  <div id="modal-container"></div>
+
+  <!-- Judge Tour Floating Widget Container -->
+  <div id="demo-tour-container"></div>
+
+  <!-- Public Layout Shell (Landing, Login, Register) -->
+  <div id="public-shell" style="display: none;">
+    <div id="public-content"></div>
+  </div>
+
+  <!-- Authenticated Governance Workspace Shell -->
+  <div id="app-shell" class="min-h-screen flex flex-col text-slate-900 font-sans" style="display: flex;">
+    
+    <!-- Top Enterprise Navigation Header -->
+    <header class="h-16 bg-white border-b border-slate-200 sticky top-0 z-30 flex items-center justify-between px-6">
+      <div class="flex items-center space-x-3">
+        <a href="#/dashboard" class="flex items-center space-x-2.5">
+          <div class="w-8 h-8 rounded-md bg-slate-900 flex items-center justify-center text-white shadow-xs">
+            <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+          </div>
+          <div>
+            <span class="font-bold text-slate-900 text-base tracking-tight leading-none block">Inkloom Guardian</span>
+            <span class="text-[10px] text-slate-500 font-medium tracking-wide uppercase">Brand Governance & Risk Intelligence</span>
+          </div>
+        </a>
+
+        <div id="header-demo-badge" class="hidden sm:inline-flex items-center ml-2">
+          <span class="badge badge-demo">VOLTERRA DEMO</span>
+        </div>
+      </div>
+
+      <!-- Right Header Controls -->
+      <div class="flex items-center space-x-2 sm:space-x-3">
+        <!-- Judge Guided Tour Header Button -->
+        <button
+          id="header-judge-tour-btn"
+          class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 transition shadow-xs"
+        >
+          <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" />
+          </svg>
+          <span>Judge Tour</span>
+        </button>
+
+        <!-- Role Switcher Dropdown for Demonstration -->
+        <div class="relative">
+          <button
+            id="header-role-btn"
+            class="inline-flex items-center space-x-1.5 px-2.5 py-1.5 rounded border border-slate-200 bg-slate-50 text-xs font-medium text-slate-700 hover:bg-slate-100 transition-colors"
+          >
+            <span class="hidden sm:inline text-slate-500">Role:</span>
+            <strong id="header-user-role" class="text-slate-900 capitalize text-xs">Compliance Officer</strong>
+            <svg class="w-3 h-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </button>
+
+          <div id="header-role-dropdown" class="hidden absolute right-0 mt-2 w-72 bg-white rounded-md shadow-lg border border-slate-200 py-1.5 z-50 text-xs">
+            <div class="px-3 py-2 border-b border-slate-100 bg-slate-50">
+              <span class="font-semibold text-slate-800 block">Demonstration Role Switcher</span>
+              <span class="text-[11px] text-slate-500">Switch instantly between Volterra governance personas</span>
+            </div>
+            <button
+              data-role-switch="compliance_officer"
+              data-role-name="Dr. Elena Vance (Lead Regulatory Compliance)"
+              class="w-full text-left px-3 py-2 hover:bg-slate-50 flex items-center justify-between"
+            >
+              <div>
+                <span class="font-medium text-slate-800 block">Dr. Elena Vance</span>
+                <span class="text-[10px] text-slate-500">Lead Regulatory Compliance</span>
+              </div>
+            </button>
+            <button
+              data-role-switch="brand_manager"
+              data-role-name="Marcus Sterling (Brand Director)"
+              class="w-full text-left px-3 py-2 hover:bg-slate-50 flex items-center justify-between border-t border-slate-50"
+            >
+              <div>
+                <span class="font-medium text-slate-800 block">Marcus Sterling</span>
+                <span class="text-[10px] text-slate-500">Brand Director</span>
+              </div>
+            </button>
+            <button
+              data-role-switch="content_creator"
+              data-role-name="Sarah Chen (Technical Copywriter)"
+              class="w-full text-left px-3 py-2 hover:bg-slate-50 flex items-center justify-between border-t border-slate-50"
+            >
+              <div>
+                <span class="font-medium text-slate-800 block">Sarah Chen</span>
+                <span class="text-[10px] text-slate-500">Technical Copywriter</span>
+              </div>
+            </button>
+            <button
+              data-role-switch="admin"
+              data-role-name="System Administrator"
+              class="w-full text-left px-3 py-2 hover:bg-slate-50 flex items-center justify-between border-t border-slate-50"
+            >
+              <div>
+                <span class="font-medium text-slate-800 block">System Administrator</span>
+                <span class="text-[10px] text-slate-500">Platform Admin</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- User Profile & Sign Out Button -->
+        <button
+          id="header-logout-btn"
+          class="p-2 text-slate-500 hover:text-slate-800 rounded hover:bg-slate-100 transition-colors"
+          title="Sign Out"
+        >
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Workspace Layout with Sidebar -->
+    <div class="flex flex-1">
+      
+      <!-- Sidebar -->
+      <aside class="w-64 bg-white border-r border-slate-200 flex flex-col justify-between h-[calc(100vh-4rem)] sticky top-16 select-none flex-shrink-0">
+        <div class="py-4 px-3 overflow-y-auto">
+          <div class="px-3 mb-2">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              Governance Platform
+            </span>
+          </div>
+
+          <nav class="space-y-1">
+            <a href="#/dashboard" class="nav-link flex items-center justify-between px-3 py-2 text-xs font-medium rounded-md transition-colors text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+              <div class="flex items-center space-x-2.5">
+                <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+                <span>Overview</span>
+              </div>
+            </a>
+
+            <a href="#/submissions" class="nav-link flex items-center justify-between px-3 py-2 text-xs font-medium rounded-md transition-colors text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+              <div class="flex items-center space-x-2.5">
+                <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                <span>Content Submissions</span>
+              </div>
+            </a>
+
+            <a href="#/claim-verification" class="nav-link flex items-center justify-between px-3 py-2 text-xs font-medium rounded-md transition-colors text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+              <div class="flex items-center space-x-2.5">
+                <svg class="w-4 h-4 flex-shrink-0 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Claim Verification</span>
+              </div>
+              <span class="px-1.5 py-0.2 bg-emerald-100 text-emerald-800 text-[9px] font-bold uppercase rounded">Core</span>
+            </a>
+
+            <a href="#/evidence-sources" class="nav-link flex items-center justify-between px-3 py-2 text-xs font-medium rounded-md transition-colors text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+              <div class="flex items-center space-x-2.5">
+                <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                <span>Evidence Sources</span>
+              </div>
+            </a>
+
+            <a href="#/claims" class="nav-link flex items-center justify-between px-3 py-2 text-xs font-medium rounded-md transition-colors text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+              <div class="flex items-center space-x-2.5">
+                <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
+                <span>Approved Claims</span>
+              </div>
+            </a>
+
+            <a href="#/guidelines" class="nav-link flex items-center justify-between px-3 py-2 text-xs font-medium rounded-md transition-colors text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+              <div class="flex items-center space-x-2.5">
+                <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                <span>Brand Guidelines</span>
+              </div>
+            </a>
+
+            <a href="#/policy-learning" class="nav-link flex items-center justify-between px-3 py-2 text-xs font-medium rounded-md transition-colors text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+              <div class="flex items-center space-x-2.5">
+                <svg class="w-4 h-4 flex-shrink-0 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                <span>Policy Learning</span>
+              </div>
+              <span class="px-1.5 py-0.2 bg-amber-100 text-amber-800 text-[9px] font-bold uppercase rounded">Adaptive</span>
+            </a>
+
+            <a href="#/campaigns" class="nav-link flex items-center justify-between px-3 py-2 text-xs font-medium rounded-md transition-colors text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+              <div class="flex items-center space-x-2.5">
+                <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
+                <span>Campaign Workspace</span>
+              </div>
+            </a>
+
+            <a href="#/risk-reports" class="nav-link flex items-center justify-between px-3 py-2 text-xs font-medium rounded-md transition-colors text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+              <div class="flex items-center space-x-2.5">
+                <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                <span>Risk Analysis</span>
+              </div>
+            </a>
+
+            <a href="#/reviews" class="nav-link flex items-center justify-between px-3 py-2 text-xs font-medium rounded-md transition-colors text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+              <div class="flex items-center space-x-2.5">
+                <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
+                <span>Human Review Center</span>
+              </div>
+            </a>
+
+            <a href="#/audit" class="nav-link flex items-center justify-between px-3 py-2 text-xs font-medium rounded-md transition-colors text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+              <div class="flex items-center space-x-2.5">
+                <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Audit History</span>
+              </div>
+            </a>
+
+            <a href="#/settings" class="nav-link flex items-center justify-between px-3 py-2 text-xs font-medium rounded-md transition-colors text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+              <div class="flex items-center space-x-2.5">
+                <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                <span>Settings & Team</span>
+              </div>
+            </a>
+          </nav>
+        </div>
+
+        <!-- Sidebar Footer -->
+        <div class="p-3 border-t border-slate-200 bg-slate-50">
+          <div class="px-2 py-1.5 flex items-center justify-between text-[11px] text-slate-500">
+            <span class="flex items-center space-x-1">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
+              <span class="font-medium text-slate-700">Governance Engine</span>
+            </span>
+            <span class="text-[10px] bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-mono font-bold">
+              v2.4
+            </span>
+          </div>
+          <div class="px-2 pt-1 flex items-center space-x-3 text-[10px] text-slate-400">
+            <a href="#/privacy" class="hover:text-slate-600">Privacy Policy</a>
+            <span>•</span>
+            <a href="#/terms" class="hover:text-slate-600">Terms</a>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Dynamic Page Content Container -->
+      <main class="flex-1 p-6 lg:p-8 max-w-7xl w-full mx-auto overflow-x-hidden pb-28">
+        <div id="app-content"></div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Vanilla JavaScript Application Scripts -->
+  <script src="js/notifications.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/tour.js"></script>
+
+  <!-- Page View Renderers -->
+  <script src="js/pages/landing.js"></script>
+  <script src="js/pages/login.js"></script>
+  <script src="js/pages/register.js"></script>
+  <script src="js/pages/dashboard.js"></script>
+  <script src="js/pages/submissions.js"></script>
+  <script src="js/pages/submissions-new.js"></script>
+  <script src="js/pages/claim-verification.js"></script>
+  <script src="js/pages/evidence.js"></script>
+  <script src="js/pages/claims.js"></script>
+  <script src="js/pages/guidelines.js"></script>
+  <script src="js/pages/campaigns.js"></script>
+  <script src="js/pages/risk.js"></script>
+  <script src="js/pages/reviews.js"></script>
+  <script src="js/pages/policy-learning.js"></script>
+  <script src="js/pages/audit.js"></script>
+  <script src="js/pages/settings.js"></script>
+  <script src="js/pages/legal.js"></script>
+
+  <!-- Router and Bootstrap -->
+  <script src="js/router.js"></script>
+  <script src="js/app.js"></script>
+</body>
 </html>

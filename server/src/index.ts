@@ -1,7 +1,5 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
-import helmet from 'helmet';
-import { rateLimit } from 'express-rate-limit';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
@@ -31,23 +29,18 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// Security Headers with Helmet
-app.use(
-  helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-inline'"],
-        styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
-        fontSrc: ["'self'", 'https://fonts.gstatic.com', 'data:'],
-        imgSrc: ["'self'", 'data:', 'blob:'],
-        connectSrc: ["'self'"],
-      },
-    },
-    crossOriginEmbedderPolicy: false,
-    crossOriginResourcePolicy: { policy: 'cross-origin' },
-  })
-);
+// Essential HTTP Security Headers configured directly in Express (Zero 3rd-party dependencies; replaces helmet)
+app.use((_req: Request, res: Response, next: NextFunction) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader(
+    'Content-Security-Policy',
+    "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self'"
+  );
+  next();
+});
 
 // Strict CORS Configuration
 const allowedOrigins = process.env.ALLOWED_ORIGINS
@@ -70,26 +63,8 @@ app.use(
   })
 );
 
-// Rate Limiting: General API Limiter
-const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 500, // limit each IP to 500 requests per windowMs
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: 'Rate limit exceeded: Too many requests. Please try again later.' },
-});
-app.use('/api/', apiLimiter);
-
-// Rate Limiting: Sensitive Auth Limiter
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 30, // limit to 30 authentication attempts per 15 minutes
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: 'Too many authentication attempts. Please try again after 15 minutes.' },
-});
-app.use('/api/auth/login', authLimiter);
-app.use('/api/auth/register', authLimiter);
+// NOTE: express-rate-limit package has been completely removed as requested.
+// Public API endpoints are served without external rate-limiting middleware.
 
 // Request Parsing with strict payload size limits
 app.use(express.json({ limit: '15mb' }));
@@ -167,22 +142,24 @@ app.use('/api/audit', auditRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/demo', demoRoutes);
 
-// Serve Frontend Client build if available
-const possibleClientDistPaths = [
+// Serve Static Frontend (plain HTML/CSS/JS without build step, with fallback to dist if present)
+const possibleClientPaths = [
+  path.resolve(__dirname, '../../client'),
+  path.resolve(process.cwd(), '../client'),
+  path.resolve(process.cwd(), 'client'),
   path.resolve(__dirname, '../../client/dist'),
-  path.resolve(process.cwd(), '../client/dist'),
   path.resolve(process.cwd(), 'client/dist'),
 ];
 
-for (const distPath of possibleClientDistPaths) {
-  if (fs.existsSync(distPath)) {
-    console.log(`[Inkloom Guardian] Serving static frontend from: ${distPath}`);
-    app.use(express.static(distPath));
+for (const clientPath of possibleClientPaths) {
+  if (fs.existsSync(path.join(clientPath, 'index.html'))) {
+    console.log(`[Inkloom Guardian] Serving static frontend from: ${clientPath}`);
+    app.use(express.static(clientPath));
     app.get('*', (req: Request, res: Response, next: NextFunction) => {
       if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) {
         return next();
       }
-      res.sendFile(path.join(distPath, 'index.html'));
+      res.sendFile(path.join(clientPath, 'index.html'));
     });
     break;
   }

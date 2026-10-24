@@ -1,12 +1,12 @@
 # Inkloom Guardian
 
-> **AI-Powered Enterprise Brand Governance, Evidence-Backed Claim Verification & Risk Intelligence Platform**
+> **Enterprise Brand Governance, Evidence-Backed Claim Verification & Risk Intelligence Platform**
 
 [![Node.js Version](https://img.shields.io/badge/Node.js-%3E%3D18.0.0-brightgreen.svg)](https://nodejs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue.svg)](https://www.typescriptlang.org/)
-[![React](https://img.shields.io/badge/React-18.3-61dafb.svg)](https://react.dev/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38bdf8.svg)](https://tailwindcss.com/)
-[![Database-Free Architecture](https://img.shields.io/badge/Architecture-Database--Free%20(In--Memory)-purple.svg)](#8-database-free-architecture)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7%20(Server)-blue.svg)](https://www.typescriptlang.org/)
+[![Frontend](https://img.shields.io/badge/Frontend-HTML5%20%2B%20CSS3%20%2B%20Vanilla%20JS-orange.svg)](#5-technology-stack)
+[![Tailwind CSS](https://img.shields.io/badge/Styling-Tailwind%20CSS%20(Static%20CDN)-38bdf8.svg)](https://tailwindcss.com/)
+[![Database-Free Architecture](https://img.shields.io/badge/Architecture-Database--Free%20(In--Memory)-purple.svg)](#7-database-free-architecture)
 [![Test Suite](https://img.shields.io/badge/Automated_Tests-134%2F134_Passing-success.svg)](#14-automated-testing)
 [![License](https://img.shields.io/badge/License-MIT-amber.svg)](LICENSE)
 
@@ -29,17 +29,19 @@
 13. [API Endpoints Reference](#13-api-endpoints-reference)
 14. [Automated Testing](#14-automated-testing)
 15. [Security & Governance](#15-security--governance)
-16. [Limitations & Future Enhancements](#16-limitations--future-enhancements)
-17. [Contributing Guidelines](#17-contributing-guidelines)
+16. [Deployment Guide](#16-deployment-guide)
+17. [Limitations & Future Enhancements](#17-limitations--future-enhancements)
 18. [License & Ethical Disclaimer](#18-license--ethical-disclaimer)
 
 ---
 
 ## 1. Project Overview
 
-**Inkloom Guardian** is an enterprise-grade AI brand governance platform designed to protect organizations from unverified claims, cross-channel inconsistencies, regulatory violations, and costly brand damage. 
+**Inkloom Guardian** is an enterprise-grade brand governance platform designed to protect organizations from unverified claims, cross-channel campaign contradictions, regulatory violations, and costly brand damage. 
 
-The platform acts as an automated, evidence-grounded gatekeeper between marketing/content teams and public distribution channels. It cross-checks all statements against authorized source documents, cross-compares campaign assets for contradictory specifications or pricing, computes deterministic and explainable brand risk scores, and routes high-risk materials through a structured human-in-the-loop review workflow.
+The platform acts as an automated, evidence-grounded gatekeeper between marketing/content teams and public distribution channels. It cross-checks all assertions against authorized source documents, cross-compares campaign assets for contradictory specifications or pricing, computes deterministic and explainable brand risk scores, and routes high-risk materials through a structured human-in-the-loop review workflow.
+
+The project features a **pure static HTML5, CSS3, and Vanilla JavaScript frontend** (requiring zero frontend compilation or build step) paired with a high-performance **Node.js + Express backend** running on an in-memory database engine.
 
 ---
 
@@ -65,45 +67,49 @@ Inkloom Guardian solves these challenges through **deterministic evidence ground
   - **Supported:** Substantiated by verified active documentation with exact page and section citations.
   - **Contradicted:** Directly conflicts with approved metrics or ground truth data points.
   - **Unverified:** Novel assertion lacking any substantiating audit, policy, or legal documentation.
-  - **Needs Human Review:** Weak lexical overlap or matches an outdated/superseded evidence source.
-- Generates actionable, context-aware suggested corrections.
+  - **Needs Human Review:** Matches an outdated/superseded evidence source.
+- Generates actionable, context-aware suggested corrections with 1-click text application.
 
-### 🌐 Cross-Campaign Consistency Intelligence
-- Centralized Campaign Workspace managing multi-channel assets (text drafts, PDF press releases, social copy, ad creatives).
-- Extracts structured entity facts: product names, tier pricing, technical specifications, warranty terms, and promotional validity windows.
-- Filters out legitimate tier differences (e.g., Starter vs. Enterprise tier pricing) to eliminate false positives.
-- Flags cross-asset discrepancies with exact snippet references, approved source of truth, severity classification, and itemized deductions.
-- Computes a mathematical **Campaign Consistency Score** starting from 100 with itemized deductions.
+### 📊 Traceable Evidence Provenance Graph
+- Models claims, evidence passages, primary source documents, brand rules, and review actions as an interconnected graph.
+- Interactive multi-column hierarchy allows reviewers to trace any claim back to its exact page and paragraph in certified PDFs or spec sheets.
 
-### 📊 Explainable Deterministic Brand Risk Engine
-- Deterministic scoring formula strictly bounded between 0 and 100.
-- Categorizes findings into clear risk bands: **Minimal (0–19)**, **Low (20–39)**, **Moderate (40–59)**, **High (60–79)**, and **Critical (80–100)**.
-- Separates finding **Severity** (Critical, High, Medium, Low) from detection **Confidence** (0.0 to 1.0).
-- Applies verified domain multipliers: Legal/Regulatory (1.4x), Financial (1.3x), Safety (1.5x), Brand (1.0x).
-- Deduplicates correlated findings to prevent artificial score inflation.
-- Explicitly isolates **Unresolved Uncertainties** for missing evidence.
-- *Strict Ethical Disclaimer:* Does not claim to empirically predict financial brand damage.
+### 🔄 Cross-Campaign Consistency Intelligence
+- Cross-asset comparison across advertising, social media, landing pages, and press releases.
+- Automatically detects:
+  - Conflicting prices for the same product tier or promotional offer.
+  - Contradictory performance metrics and technical specifications (e.g., 18 hrs vs 30 hrs battery life).
+  - Expired promotional offer dates.
+  - Missing mandatory regulatory disclaimers.
+- Computes a transparent **Campaign Consistency Score (0–100)** with clear itemized point deductions.
 
-### 👥 Human-in-the-Loop Approval Workflow
-- Formal lifecycle states: `draft` ➔ `analysis_pending` ➔ `analysis_complete` ➔ `needs_revision` ➔ `ready_for_review` ➔ `approved` / `rejected`.
-- Strict Role-Based Access Control (RBAC): Content Creators are barred from self-approving high-risk assets; only Compliance Officers and Brand Directors can grant publication sign-off.
-- Side-by-side **Version Comparison Snapshots** displaying risk reduction deltas (e.g., initial draft risk 88 ➔ remediated draft risk 12).
-- Approval audit trail recording reviewer identity, timestamp, rationale, and mandatory justification notes for high-risk exceptions.
+### 🛡️ Explainable Brand Risk Assessment Engine
+- Deterministic formula strictly bounded between 0 and 100 with clear risk categories (Low, Medium, High, Critical).
+- Separates severity from confidence (does not blend or confuse them).
+- Applies domain criticality multipliers (Legal/Regulatory: 1.4x, Financial: 1.2x, Tone: 0.9x).
+- Deduplicates correlated findings to prevent double-counting penalties.
+- Highlights unresolved uncertainties and provides actionable remediation guidance.
+- Non-arbitrary disclaimer: clearly states that a score of 100 represents an itemized governance metric, not a scientific damage probability.
 
-### 🧠 Policy Learning from Reviewer Feedback
-- Captures reviewer decisions (accepted corrections, rejected suggestions, documented exceptions).
-- Computes empirical violation frequencies and recommendation acceptance rates.
-- Suggests candidate guideline updates without automatically altering official brand policies.
-- Protects confidential customer content via explicit retention policies and automated privacy scrubbing.
-- Authorizes administrators to inspect, edit, or purge feedback records.
+### 👤 Human Approval Workflow & Version Snapshots
+- Formal lifecycle states: `Draft` → `Analysis Pending` → `Analysis Complete` → `Needs Revision` → `Ready for Review` → `Approved` or `Rejected`.
+- Role-Based Access Control (RBAC) enforcing separation of duties (content creators cannot self-approve).
+- Mandatory written justification notes required for high-risk overrides.
+- Visual revision comparison snapshots demonstrating quantitative risk reduction (e.g., from 88 to 12).
 
-### ⚡ Interactive Demo Mode (VOLTERRA EV Battery Scenario)
-- Realistic fictional brand scenario (**VOLTERRA**) promoting next-generation electric vehicle batteries.
-- 1-click persona switching tokens for **Compliance Officer**, **Brand Director**, **Content Creator**, and **System Administrator**.
-- Preloaded ground truth specification sheet (1,200 cycles approved) and certified price list (\$5,800).
-- 3 deliberate multi-channel campaign assets containing conflicting specifications (1,800 cycles vs 1,200 cycles) and conflicting prices (\$5,800 vs \$6,200 vs \$7,400).
-- 12-step guided judge tour through the complete verification, consistency scan, risk triage, and approval workflow.
-- Sandboxed zero-impact demo reset that preserves multi-tenant data integrity.
+### 💡 Policy Learning from Reviewer Feedback
+- Passively records reviewer decisions, accepted corrections, and justified exceptions.
+- Highlights frequently violated rules and measures recommendation acceptance rates.
+- Suggests candidate guideline updates requiring explicit authorized administrator sign-off.
+- Maintains an explicit legal distinction between observed reviewer preferences and certified factual evidence.
+- Compliant with enterprise privacy: zero customer content is used for third-party model training.
+
+### ⚡ Interactive Demo Mode for Hackathon Judges
+- Preloaded **VOLTERRA** electric vehicle battery scenario.
+- 12-step guided interactive judge tour with automated navigation and persona switching.
+- 1-click persona switching (Compliance Officer, Brand Director, Content Creator, Administrator).
+- 1-click form autofill snippets for instant claim testing.
+- Sandboxed "Reset Demo" button restoring pristine baseline demonstration state.
 
 ---
 
@@ -111,12 +117,13 @@ Inkloom Guardian solves these challenges through **deterministic evidence ground
 
 ```mermaid
 flowchart TD
-    A[Content Submission / Campaign Asset] --> B[Deterministic Claim & Fact Extraction]
+    A[Content Submission / Marketing Copy] --> B[Deterministic Fact & Claim Extraction]
     B --> C[Passage Retrieval from Approved Evidence Library]
+    
     C --> D{Claim Verification Engine}
-    D -->|Matches Active Evidence| E[Classified: Supported]
-    D -->|Conflicts with Approved Spec| F[Classified: Contradicted]
-    D -->|Zero Evidence Found| G[Classified: Unverified]
+    D -->|Substantiated with Page Citation| E[Classified: Supported]
+    D -->|Direct Conflict with Ground Truth| F[Classified: Contradicted]
+    D -->|No Evidence Found| G[Classified: Unverified]
     D -->|Outdated Source / Weak Overlap| H[Classified: Needs Human Review]
     
     A --> I[Cross-Campaign Consistency Scanner]
@@ -131,27 +138,19 @@ flowchart TD
     N -->|Reviewer Feedback Recorded| Q[Policy Learning & Candidate Recommendations]
 ```
 
-1. **Ingest Content:** Content creators submit plain text copy, campaign briefs, or multi-asset bundles.
-2. **Deterministic Extraction:** System identifies numerical, factual, and promotional statements, extracting normalized metrics (currencies, cycles, dates, percentages).
-3. **Passage Grounding:** Retrieves candidate passages from approved corporate evidence sources using structured lexical and keyword matching.
-4. **Classification & Verification:** Compares assertions against retrieved evidence, tagging citations with document version, page number, and section header.
-5. **Cross-Asset Consistency Scan:** In campaign mode, all assets are cross-checked against each other and the approved library to identify pricing discrepancies, spec mismatches, and expired promo dates.
-6. **Risk Computation:** Applies the weighted deterministic formula across all findings, factoring in domain criticality and evidence weighting.
-7. **Human Approval Gate:** Routes content to authorized reviewers. If changes are made, side-by-side snapshots illustrate the exact risk reduction.
-8. **Feedback Ingestion:** Reviewer corrections are anonymously aggregated to identify recurring policy bottlenecks.
-
 ---
 
 ## 5. Technology Stack
 
 | Layer | Technologies |
 |---|---|
-| **Frontend UI** | React 18, TypeScript, Vite, Tailwind CSS, Lucide React Icons, React Router DOM |
-| **Backend API** | Node.js (v18–v22), Express 4, TypeScript (ESM modules), Helmet (CSP headers), CORS, Express Rate Limit, Multer, Zod, UUID |
-| **Authentication & Security** | JSON Web Tokens (JWT), Bcryptjs password hashing, Role-Based Access Control (RBAC), Helmet security headers |
+| **Frontend UI** | **Pure HTML5, CSS3, Vanilla JavaScript (ES6+)**, Tailwind CSS (via CDN), Google Fonts Inter, SVG icons |
+| **Frontend Build Step** | **None (Zero Build Step)** — Served directly as static files without Vite, React, or TypeScript compilers |
+| **Backend API** | Node.js (v18–v22), Express 4, TypeScript (ESM modules), Native Express Security Headers, CORS, Multer, Zod, UUID |
+| **Authentication & Security** | JSON Web Tokens (JWT), Bcryptjs password hashing, Role-Based Access Control (RBAC), Native HTTP Security Headers |
 | **Data Engine** | **Database-Free In-Memory Query Engine (`InMemoryDatabase`)** with full SQL dialect compatibility and automatic demonstration seed provisioning |
 | **AI / Intelligence Engine** | Pluggable architecture: Built-in Enterprise Heuristic & Deterministic Rule Intelligence Engine; optional adapters for Google Gemini, OpenAI, and Anthropic Claude |
-| **Testing** | Node.js / tsx automated test runners with 134 unit and integration tests |
+| **Testing** | Node.js / tsx automated test runners with 134 unit and integration tests passing |
 
 ---
 
@@ -159,7 +158,7 @@ flowchart TD
 
 ```mermaid
 graph LR
-    subgraph Client ["Client (React + Vite + Tailwind)"]
+    subgraph Client ["Client (Static HTML5 + CSS3 + Vanilla JS)"]
         UI[User Interface & Dashboard]
         Tour[12-Step Judge Walkthrough]
         Switcher[1-Click Persona Switcher]
@@ -169,7 +168,7 @@ graph LR
     subgraph Server ["Server (Node.js + Express + TypeScript)"]
         Router[REST API Routes]
         AuthMW[JWT Auth & RBAC Middleware]
-        SecMW[Helmet, CORS & Rate Limiting]
+        SecMW[Native Security Headers & CORS]
         
         subgraph Services ["Core Intelligence Services"]
             ClaimSvc[Claim Verification Service]
@@ -200,17 +199,12 @@ graph LR
 
 Inkloom Guardian is engineered with a **pure TypeScript in-memory query engine (`InMemoryDatabase`)**, eliminating any dependency on external database servers such as PostgreSQL, MySQL, or cloud datastores.
 
-### Why Database-Free?
+### Benefits of Database-Free Architecture:
 - **Zero Configuration for Evaluators & Judges:** No need to install PostgreSQL, configure connection strings, start Docker daemons, or troubleshoot port conflicts.
 - **Instant Boot:** Starts up in under 500 milliseconds.
 - **Portability:** Runs identically across macOS, Windows, and Linux environments.
-- **100% Contract Compatibility:** The `InMemoryDatabase` exposes the standard `db.query<T>(sql, params)` interface, supporting:
-  - Parameterized bindings (`$1`, `$2`, ...)
-  - `INSERT` with `ON CONFLICT DO UPDATE / DO NOTHING` and `RETURNING *`
-  - `UPDATE` with `COALESCE` and `RETURNING`
-  - `DELETE` with nested subquery filtering
-  - `SELECT` with `INNER / LEFT JOIN`, multi-condition `WHERE`, `GROUP BY`, `ORDER BY`, `LIMIT`, `OFFSET`, subqueries, and aggregate functions (`COUNT(*)`, `SUM(CASE ...)`, `AVG`)
-- **Persistence & Seeding Behavior:** On server boot, the system verifies all 20 in-memory tables and automatically provisions comprehensive enterprise demonstration data. *Note: Data lives in memory during the server process lifecycle and returns to the clean baseline state upon server restart or via the 1-click Reset Demo button.*
+- **100% Contract Compatibility:** The `InMemoryDatabase` exposes the standard `db.query<T>(sql, params)` interface supporting parameterized queries, subqueries, joins, and aggregations.
+- **Persistence & Seeding Behavior:** On server boot, the system verifies all 20 in-memory tables and automatically provisions comprehensive enterprise demonstration data.
 
 ---
 
@@ -218,274 +212,216 @@ Inkloom Guardian is engineered with a **pure TypeScript in-memory query engine (
 
 - **Node.js:** `v18.0.0` or higher (`v20.x` or `v22.x` recommended).
 - **npm:** `v9.0.0` or higher.
-- **Git**
-
-Verify your environment:
-```bash
-node -v
-npm -v
-git --version
-```
 
 ---
 
 ## 9. Environment Variables
 
-Create a `server/.env` file based on the provided `server/.env.example`. Because Inkloom Guardian operates database-free, **no database connection strings are required.**
+Create `.env` in the repository root or `server/.env` based on `.env.example`:
 
 ```env
-# Server Configuration
-PORT=5000
+# Application Environment
 NODE_ENV=development
+PORT=5000
 
-# Authentication Security (Change in production)
-JWT_SECRET=inkloom_jwt_super_secure_enterprise_secret_key_2026_change_in_production
+# Authentication & Security
+JWT_SECRET=super_secret_jwt_key_inkloom_guardian_2026_production
 JWT_EXPIRES_IN=7d
 
-# LLM / AI Engine Configuration
-# Available Providers: 'mock', 'gemini', 'openai', 'anthropic'
-# Default 'mock' utilizes the built-in deterministic heuristic rule engine
-LLM_PROVIDER=mock
-GEMINI_API_KEY=
-OPENAI_API_KEY=
-ANTHROPIC_API_KEY=
-LLM_MODEL=default
-
-# Upload Configuration
+# File Uploads
 MAX_UPLOAD_SIZE_MB=15
-UPLOAD_DIR=./uploads
+UPLOAD_DIR=uploads
+
+# CORS Allowed Origins
+ALLOWED_ORIGINS=http://localhost:5000,http://127.0.0.1:5000,http://localhost:5173
+
+# AI Intelligence Model
+LLM_PROVIDER=mock
+LLM_MODEL=inkloom-deterministic-v2
 ```
 
 ---
 
 ## 10. Getting Started & Installation
 
-### Step 1: Clone the Repository
+Clone the repository and install dependencies:
+
 ```bash
 git clone https://github.com/prateek9126/Inkloom-Guardian.git
 cd Inkloom-Guardian
-```
 
-### Step 2: Install Dependencies
-The project uses npm workspaces to manage client and server dependencies simultaneously:
-```bash
+# Install dependencies (only server backend packages needed)
 npm install
-```
-
-### Step 3: Configure Environment
-Copy the example environment configuration into the server folder:
-```bash
-# On Linux/macOS
-cp server/.env.example server/.env
-
-# On Windows (PowerShell)
-Copy-Item server/.env.example server/.env
 ```
 
 ---
 
 ## 11. Running the Application
 
-### Full-Stack Development Mode (Recommended)
-Runs both the Express backend (Port 5000) and the Vite frontend (Port 5173) concurrently:
+### Development Mode
+
+Start the backend server (which automatically serves the static frontend):
+
 ```bash
 npm run dev
 ```
-Open your browser at **[http://localhost:5173](http://localhost:5173)**.
 
-### Running Backend or Frontend Individually
+Visit **`http://localhost:5000`** in your browser. The application is immediately live with all preloaded Volterra demo data!
+
+### Production Build & Start
+
 ```bash
-# Start backend only
-npm run dev:server
-
-# Start frontend only
-npm run dev:client
-```
-
-### Production Build & Launch
-```bash
-# Compile both client and server packages
+# Build the backend TypeScript
 npm run build
 
-# Start the compiled production server
-npm run start
+# Start the production server
+npm start
 ```
-The production server serves both the REST API and the compiled static frontend on **http://localhost:5000**.
 
 ---
 
 ## 12. Interactive Demo Mode (Judge Walkthrough)
 
-Inkloom Guardian includes a **Hackathon Judge Demo Mode** designed for instant evaluation without manual data entry.
+Inkloom Guardian includes a complete interactive demonstration mode designed specifically for hackathon evaluation:
 
-### Preloaded Scenario: VOLTERRA Electric Vehicle Batteries
-- **Organization:** VOLTERRA Energy Technologies (EV Battery Manufacturing)
-- **Approved Evidence:**
-  - *Engineering Spec Sheet (v3.2):* Officially certifies **1,200 charge cycles** at 80% capacity retention.
-  - *Master Price Catalog:* Officially lists base unit price at **\$5,800**.
-  - *Safety Certification (ISO-26262):* Certified thermal runaway threshold at 165°C.
-- **Deliberate Campaign Inconsistencies:**
-  1. *Billboard Ad:* Claims 1,800 cycles (+50% exaggerated spec) and lists price at \$5,800.
-  2. *Social Media Creative:* Quotes discounted price of \$6,200 (+7% discrepancy) and an expired promo date.
-  3. *Press Release:* Quotes commercial fleet price of \$7,400.
-
-### 1-Click Persona Switcher
-Switch roles instantly from the top navigation bar without logging out:
-- **Compliance Officer** (`compliance@volterra.demo`) – Full governance authority, revision requests, exceptions sign-off.
-- **Brand Director** (`brand@volterra.demo`) – Brand guideline management, final marketing approval.
-- **Content Creator** (`creator@volterra.demo`) – Submits content, runs scans; restricted from self-approving high-risk assets.
-- **Administrator** (`admin@volterra.demo`) – Audit log oversight, tenant settings, feedback retention purging.
-
-### 12-Step Guided Tour Sequence
-Click **"Explore Demo"** or **"Start Guided Tour"** in the UI to walk through the complete enterprise governance lifecycle:
-1. Initialize Volterra workspace.
-2. Inspect approved ground truth evidence and passage chunking.
-3. Review brand guidelines and banned terminology.
-4. View submitted campaign assets (Billboard, Social, Press Release).
-5. Execute Claim Verification Scan (observe Supported vs Contradicted classifications).
-6. Inspect Evidence Graph node links and passage citations.
-7. Run Cross-Campaign Consistency Intelligence Scan (detect spec and pricing conflicts).
-8. Examine Explainable Risk Breakdown and deterministic formula weights.
-9. Inspect Side-by-Side Version Snapshot (v1 draft risk 88 ➔ v2 remediated risk 12).
-10. Switch to Compliance Officer persona and review justification requirements.
-11. Grant publication sign-off and seal the immutable audit trail.
-12. Review Policy Learning recommendations generated from reviewer actions.
-
-*Resetting the Demo:* Click **"Reset Demo Data"** at any time to restore the demonstration state.
+1. **Launch Judge Tour:** Click the **"Judge Tour"** button in the top navigation or on the dashboard banner.
+2. **Follow the 12-Step Tour:**
+   - **Step 1:** Workspace Initialization & Volterra EV Brand Baseline
+   - **Step 2:** Inspect Certified Primary Benchmark Documents
+   - **Step 3:** Examine Pre-Approved Claims Library
+   - **Step 4:** Review Active Brand Guidelines & Prohibited Claims
+   - **Step 5:** Submit New Content Asset with Deliberate Discrepancies
+   - **Step 6:** Traceable Evidence Provenance Graph Inspection
+   - **Step 7:** Explainable Risk Scoring Formula & Severity Weights
+   - **Step 8:** Cross-Campaign Consistency Contradiction Detection
+   - **Step 9:** Side-by-Side Asset Contradiction Resolution
+   - **Step 10:** Human Review & Approval Workflow
+   - **Step 11:** Revision Comparison & Quantitative Risk Reduction (-76 pts)
+   - **Step 12:** Cryptographic Audit Trail Sealing
+3. **1-Click Persona Switching:** Use the header role switcher to instantly alternate between:
+   - `Dr. Elena Vance` (Lead Regulatory Compliance)
+   - `Marcus Sterling` (Brand Governance Director)
+   - `Sarah Chen` (Senior Technical Copywriter)
+   - `System Administrator` (Platform Administrator)
+4. **Reset Demo:** Click **"Reset Demo"** anytime to restore the initial demonstration state.
 
 ---
 
 ## 13. API Endpoints Reference
 
-### Authentication (`/api/auth`)
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/api/auth/register` | Register a new user and organization |
-| `POST` | `/api/auth/login` | Authenticate user and receive JWT token |
-| `GET` | `/api/auth/me` | Fetch authenticated user profile and permissions |
+### Authentication
+- `POST /api/auth/login` — Sign in with email and password
+- `POST /api/auth/demo-login` — 1-click authentication into demo personas
+- `POST /api/auth/register` — Create new workspace organization
+- `GET /api/auth/me` — Retrieve active session user profile
 
-### Claim Verification (`/api/claims-verification`)
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/api/claims-verification/verify/:contentId` | Run verification scan on a content submission |
-| `GET` | `/api/claims-verification/graph/:contentId` | Retrieve interactive Evidence Graph nodes and edges |
-| `PATCH` | `/api/claims-verification/claims/:claimId/review` | Record human review action (confirm, reject, amend) |
+### Dashboard & Analytics
+- `GET /api/dashboard/stats` — Real-time metrics, risk breakdowns, recent submissions, and audit feed
 
-### Campaign Consistency (`/api/campaigns-consistency`)
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/api/campaigns-consistency/scan/:campaignId` | Execute cross-asset consistency intelligence scan |
-| `GET` | `/api/campaigns-consistency/report/:campaignId` | Fetch contradiction report and itemized score deductions |
-| `POST` | `/api/campaigns-consistency/contradictions/:id/action` | Record resolution action on a detected discrepancy |
+### Evidence & Ground Truth Library
+- `GET /api/evidence` — List certified primary evidence documents
+- `GET /api/evidence/:id` — Get document details and chunked passages
+- `POST /api/evidence` — Upload new benchmark study or spec sheet
+- `DELETE /api/evidence/:id` — Delete evidence source
 
-### Risk Assessment & Review Workflow (`/api/risk`, `/api/reviews`)
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/api/risk/evaluate/:contentId` | Calculate explainable risk score and formula breakdown |
-| `GET` | `/api/risk/report/:contentId` | Retrieve full risk analysis report with uncertainties |
-| `GET` | `/api/risk/versions/:contentId/compare` | Compare risk scores and remediation across version snapshots |
-| `POST` | `/api/reviews/submit` | Transition asset lifecycle state (request revision, approve, reject) |
-| `GET` | `/api/reviews/history/:contentId` | Fetch complete approval and decision audit history |
+### Claim Verification Engine
+- `GET /api/claims-verification/content/:contentId` — Retrieve extracted claims and evidence graph
+- `POST /api/claims-verification/content/:contentId/verify` — Execute deterministic claim verification
+- `POST /api/claims-verification/claim/:claimId/review` — Record human reviewer finding decision
+- `POST /api/claims-verification/claim/:claimId/apply-correction` — 1-click text replacement of contradicted claims
 
-### Evidence & Policy Learning (`/api/evidence`, `/api/policy-learning`)
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/evidence/sources` | List approved evidence source documents |
-| `POST` | `/api/evidence/upload` | Upload and chunk new evidence source document |
-| `GET` | `/api/policy-learning/rules/frequent` | List frequently violated rules and acceptance rates |
-| `GET` | `/api/policy-learning/recommendations` | View policy candidate recommendations |
-| `POST` | `/api/policy-learning/recommendations/:id/approve` | Admin approval of candidate guideline version |
-| `DELETE` | `/api/policy-learning/feedback/:id/purge` | GDPR / compliance retention purge of feedback record |
+### Cross-Campaign Consistency Intelligence
+- `GET /api/campaigns` — List campaign workspaces
+- `GET /api/campaigns/:id` — Get campaign details, enrolled assets, and consistency score
+- `GET /api/campaigns-consistency/:id` — Retrieve detected contradictions and extracted facts
+- `POST /api/campaigns-consistency/:id/scan` — Run cross-asset consistency scanner
+- `POST /api/campaigns-consistency/contradictions/:id/review` — Resolve contradiction or justify exception
 
-### Demonstration Engine (`/api/demo`)
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/demo/status` | Check Volterra demo workspace status |
-| `POST` | `/api/demo/initialize` | Seed or reset Volterra demonstration scenario |
-| `POST` | `/api/demo/switch-persona` | Generate instant authenticated JWT token for demo role |
-| `GET` | `/api/demo/walkthrough` | Retrieve 12-step guided judge tour sequence |
+### Risk Assessment & Human Review
+- `GET /api/risk/report/:contentId` — Detailed explainable risk report with formula breakdown
+- `POST /api/content/:id/scan` — Re-evaluate brand risk score
+- `GET /api/risk/compare/:contentId` — Compare revision snapshots (risk reduction delta)
+- `GET /api/reviews/pending` — Queue of submissions awaiting governance review
+- `POST /api/reviews/decision` — Submit formal approval or rejection with audit notes
+- `GET /api/reviews/comments/:contentId` — Discussion drawer for internal compliance notes
+
+### Policy Learning & Audit Trail
+- `GET /api/policy-learning/summary` — Reviewer decisions summary and acceptance rates
+- `GET /api/policy-learning/recommendations` — Candidate brand guideline refinements
+- `POST /api/policy-learning/recommendations/:id/approve` — Authorize candidate policy update
+- `GET /api/audit` — Immutable compliance audit log
+- `GET /api/audit/export?format=csv` — Export audit trail to CSV
 
 ---
 
 ## 14. Automated Testing
 
-Inkloom Guardian includes a comprehensive automated test suite covering all engines, mathematical formulas, role permissions, and tenant isolation guards.
+All 134 automated unit and integration tests execute cleanly with 100% pass rate:
 
-### Running All Test Suites
 ```bash
-# 1. Claim Verification Engine Test Suite
+# Run Claim Verification Engine tests (23 tests)
 npx tsx server/src/tests/claimVerification.test.ts
 
-# 2. Cross-Campaign Consistency Test Suite
+# Run Cross-Campaign Consistency tests (33 tests)
 npx tsx server/src/tests/campaignConsistency.test.ts
 
-# 3. Explainable Risk & Review Workflow Test Suite
+# Run Explainable Risk & Human Approval tests (33 tests)
 npx tsx server/src/tests/riskAssessmentWorkflow.test.ts
 
-# 4. Policy Learning & Security Hardening Test Suite
+# Run Policy Learning & Security tests (7 tests)
 npx tsx server/src/tests/policyLearningSecurity.test.ts
 
-# 5. Interactive Demo Mode Test Suite
+# Run Interactive Demo Mode tests (38 tests)
 npx tsx server/src/tests/demoMode.test.ts
 ```
-
-### Test Suite Summary
-
-| Test Suite | Tests | Status | Verification Focus |
-|---|:---:|:---:|---|
-| **Claim Verification** | 23 | ✅ Passing | Multi-type claim extraction, Supported/Contradicted/Unverified classifications, outdated source detection, evidence graph links |
-| **Campaign Consistency** | 33 | ✅ Passing | Structured fact extraction, legitimate tier filtering, cross-asset price/spec contradictions, score deduction formulas |
-| **Risk & Workflow** | 33 | ✅ Passing | Deterministic risk formulas, domain multipliers, correlated finding deduplication, RBAC approval barriers, version snapshots |
-| **Policy Learning & Security** | 7 | ✅ Passing | Reviewer preference recording, human-in-the-loop candidate recommendations, guideline versioning, data retention purging |
-| **Demo Mode** | 38 | ✅ Passing | VOLTERRA provisioning, 1-click persona token generation, multi-asset deliberate conflicts, 12-step tour, sandbox reset |
-| **Total Automated Tests** | **134** | **100%** | **134 Tests Passing with Zero Failures** |
 
 ---
 
 ## 15. Security & Governance
 
-- **Authentication:** Stateless authentication using cryptographically signed JSON Web Tokens (JWT) with configurable expiration.
-- **Password Protection:** User passwords hashed using Bcryptjs with salt work factor of 10.
-- **Role-Based Access Control (RBAC):** Strict permissions matrix enforcing separation of duties between `content_creator`, `brand_manager`, `compliance_officer`, and `admin`. Content creators cannot self-approve assets.
-- **Security Headers:** Comprehensive HTTP header protection via **Helmet**, including a strict Content Security Policy (CSP), frameguard, and cross-origin resource policies.
-- **Rate Limiting:** Double-layered rate limiting (`express-rate-limit`):
-  - General API Limiter: 500 requests per 15-minute window per IP.
-  - Sensitive Auth Limiter: 30 authentication attempts per 15-minute window per IP.
-- **Tenant Isolation:** All queries enforce strict tenant scoping via `org_id` parameters, ensuring multi-tenant data confidentiality.
-- **Audit Trails:** Immutable audit logging records all administrative actions, lifecycle state transitions, reviewer comments, and policy updates.
+### Removal of `helmet` and `express-rate-limit`
+As requested to simplify deployment and resolve TypeScript compilation packaging issues:
+1. `helmet` and `express-rate-limit` have been completely removed from dependencies and middleware.
+2. **Essential HTTP Security Headers** are directly configured natively in Express without external packages:
+   - `X-Content-Type-Options: nosniff`
+   - `X-Frame-Options: SAMEORIGIN`
+   - `X-XSS-Protection: 1; mode=block`
+   - `Referrer-Policy: strict-origin-when-cross-origin`
+   - `Content-Security-Policy: default-src 'self' ...`
+3. **Security Notice on Rate Limiting:** Request-rate limiting has been removed. In enterprise production deployments, public endpoints should be protected against denial-of-service or brute-force abuse via infrastructure-level rate limiting (e.g. Cloudflare, AWS CloudFront, or NGINX reverse proxy).
+4. **Existing Security Controls Maintained:**
+   - Strict CORS origin validation.
+   - Cryptographic JWT authentication and Bcryptjs password hashing (cost factor 10).
+   - Role-Based Access Control (RBAC) preventing unauthorized reviewer self-approvals.
+   - Input validation and payload limits (15 MB maximum).
+   - Tenant isolation preventing cross-organization data leakage.
 
 ---
 
-## 16. Limitations & Future Enhancements
+## 16. Deployment Guide
 
-### Current Design Boundaries
-- **Ephemeral In-Memory Runtime:** Because the engine operates database-free in memory, restart of the server process restores the preloaded baseline demonstration data. Production enterprise deployments requiring persistent disk storage across restarts can plug into external storage adapters or periodic JSON disk snapshots.
-- **Pluggable AI Provider Default:** By default, the system runs on the built-in deterministic rule intelligence engine (`LLM_PROVIDER=mock`), which executes deterministic verification without external API keys. Setting `LLM_PROVIDER=gemini` or `openai` enables external LLM inference.
-- **OCR Limitations:** Image and poster ingestion currently leverages server-side text extraction heuristics; integration with specialized cloud Vision APIs (Google Cloud Vision, AWS Textract) is recommended for complex scanned PDFs.
+### Static Frontend Deployment (Vercel / Netlify / GitHub Pages)
+Because the frontend is pure HTML, CSS, and vanilla JavaScript:
+- The `client` directory can be hosted statically on any CDN or static hosting platform with zero build configuration.
+- Set Publish Directory: `client`
+- Build Command: *(None / leave empty)*
 
-### Future Roadmap
-- [ ] Integration of pgvector / HNSW vector embeddings for semantic passage retrieval at million-document scale.
-- [ ] Automated Slack / Microsoft Teams webhooks for pending compliance review alerts.
-- [ ] Multi-lingual brand guideline translation and international disclaimer verification.
+### Full-Stack Serverless Deployment (Vercel)
+The repository includes root [`vercel.json`](vercel.json) and [`api/index.ts`](api/index.ts):
+- API requests to `/api/*` route to the Express backend serverless function.
+- Frontend static assets are served directly from `client/`.
 
 ---
 
-## 17. Contributing Guidelines
+## 17. Limitations & Future Enhancements
 
-Contributions to Inkloom Guardian are welcome! Please follow these steps:
-1. Fork the repository.
-2. Create your feature branch (`git checkout -b feature/amazing-feature`).
-3. Ensure all tests pass (`npx tsx server/src/tests/claimVerification.test.ts`, etc.).
-4. Commit your changes (`git commit -m 'feat: add amazing feature'`).
-5. Push to your branch (`git push origin feature/amazing-feature`).
-6. Open a Pull Request.
+- **In-Memory Volatility:** In-memory storage provisions clean baseline demo data on boot. For enterprise multi-year compliance archives, an optional SQLite / Postgres adapter can be enabled.
+- **OCR Document Processing:** Scanned image attachments currently extract plain text via simulated OCR fallback. Future releases will integrate native Tesseract or Google Cloud Vision OCR.
 
 ---
 
 ## 18. License & Ethical Disclaimer
 
-### License
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+This software is released under the **MIT License**.
 
-### Ethical & Regulatory Disclaimer
-Inkloom Guardian calculates deterministic risk scores based on heuristic weights, policy guidelines, and evidence document comparisons. **A risk score of 100 or any other calculated value is an indicator of detected policy/factual discrepancies and does not represent an empirical guarantee or scientifically validated prediction of actual financial or reputational brand damage.** Organizations must always employ qualified legal and regulatory counsel for final publication compliance.
+**Ethical Governance Notice:** Inkloom Guardian is designed to assist authorized brand compliance teams by detecting factual contradictions against primary verified documents. Risk scores reflect internal rule violations and do not constitute legal advice or guarantees against public regulatory action.
