@@ -3,17 +3,40 @@
  */
 class ApiClient {
   constructor() {
-    if (window.API_BASE_URL) {
-      this.apiBase = window.API_BASE_URL;
-    } else if (
-      window.location.protocol === 'file:' ||
-      (window.location.hostname === 'localhost' && window.location.port && window.location.port !== '5000') ||
-      (window.location.hostname === '127.0.0.1' && window.location.port && window.location.port !== '5000')
-    ) {
-      this.apiBase = 'http://localhost:5000/api';
-    } else {
-      this.apiBase = '/api';
+    this.apiBase = this.resolveApiBase();
+  }
+
+  resolveApiBase() {
+    // 1. Explicit window override (e.g. from js/config.js or inline script)
+    if (window.API_BASE_URL && typeof window.API_BASE_URL === 'string') {
+      return window.API_BASE_URL.replace(/\/+$/, '');
     }
+    if (window.INKLOOM_CONFIG && window.INKLOOM_CONFIG.API_BASE_URL) {
+      return window.INKLOOM_CONFIG.API_BASE_URL.replace(/\/+$/, '');
+    }
+
+    // 2. Local storage override (for developer toggling / testing)
+    const storedBase = localStorage.getItem('inkloom_api_base_url');
+    if (storedBase) {
+      return storedBase.replace(/\/+$/, '');
+    }
+
+    // 3. Local development environment
+    const isLocal =
+      window.location.protocol === 'file:' ||
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1';
+
+    if (isLocal) {
+      // If served directly from Express on port 5000, use relative /api
+      if (window.location.port === '5000') {
+        return '/api';
+      }
+      return 'http://localhost:5000/api';
+    }
+
+    // 4. Production deployed frontend
+    return 'https://inkloom-guardian-server.vercel.app/api';
   }
 
   getToken() {
@@ -47,7 +70,7 @@ class ApiClient {
         headers,
       });
     } catch (networkErr) {
-      throw new Error(`Unable to connect to backend API server (${this.apiBase}). Ensure the server is running on port 5000.`);
+      throw new Error(`Unable to connect to backend API server at ${this.apiBase}. (${networkErr.message})`);
     }
 
     if (!res.ok) {

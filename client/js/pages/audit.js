@@ -137,9 +137,29 @@ window.AuditPageView = {
     this.renderTable(document.getElementById('app-content'));
   },
 
-  exportCSV() {
-    window.open('/api/audit/export?format=csv', '_blank');
-    window.toast.success('Exporting audit trail to CSV...');
+  async exportCSV() {
+    try {
+      window.toast.info('Exporting audit trail to CSV...');
+      const token = window.api.getToken();
+      const res = await fetch(`${window.api.apiBase}/audit/export?format=csv`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (!res.ok) throw new Error(`Export request failed (${res.status})`);
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `audit-logs-${Date.now()}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+      window.toast.success('Audit trail CSV downloaded successfully.');
+    } catch (err) {
+      window.toast.error('Export failed: ' + err.message);
+    }
   },
 
   inspectLog(logId) {
