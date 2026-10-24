@@ -3,7 +3,17 @@
  */
 class ApiClient {
   constructor() {
-    this.apiBase = window.API_BASE_URL || '/api';
+    if (window.API_BASE_URL) {
+      this.apiBase = window.API_BASE_URL;
+    } else if (
+      window.location.protocol === 'file:' ||
+      (window.location.hostname === 'localhost' && window.location.port && window.location.port !== '5000') ||
+      (window.location.hostname === '127.0.0.1' && window.location.port && window.location.port !== '5000')
+    ) {
+      this.apiBase = 'http://localhost:5000/api';
+    } else {
+      this.apiBase = '/api';
+    }
   }
 
   getToken() {
@@ -30,19 +40,30 @@ class ApiClient {
       headers['Content-Type'] = 'application/json';
     }
 
-    const res = await fetch(`${this.apiBase}${endpoint}`, {
-      ...options,
-      headers,
-    });
+    let res;
+    try {
+      res = await fetch(`${this.apiBase}${endpoint}`, {
+        ...options,
+        headers,
+      });
+    } catch (networkErr) {
+      throw new Error(`Unable to connect to backend API server (${this.apiBase}). Ensure the server is running on port 5000.`);
+    }
 
     if (!res.ok) {
       let errorMessage = `Request failed (${res.status})`;
       try {
-        const errorData = await res.json();
-        errorMessage = errorData.error || errorData.message || errorMessage;
-      } catch {
         const text = await res.text();
-        if (text) errorMessage = text;
+        if (text) {
+          try {
+            const errorData = JSON.parse(text);
+            errorMessage = errorData.error || errorData.message || errorMessage;
+          } catch {
+            errorMessage = text;
+          }
+        }
+      } catch {
+        // Fallback to default message
       }
       throw new Error(errorMessage);
     }
