@@ -5,6 +5,7 @@ import { db } from '../db/db.js';
 import { config } from '../config/env.js';
 import { authenticate } from '../middleware/auth.js';
 import { auditService } from '../services/auditService.js';
+import { demoService } from '../services/demoService.js';
 
 const router = Router();
 
@@ -150,55 +151,36 @@ router.post('/login', async (req: Request, res: Response) => {
 
 /**
  * Demo login helper for seamless testing of different roles
+ * Strictly scoped to the isolated VOLTERRA demonstration workspace (is_demo = true)
  */
 router.post('/demo-login', async (req: Request, res: Response) => {
   try {
-    // Security Hardening: Prevent unauthenticated demo role access in production
-    if (config.nodeEnv === 'production') {
-      res.status(403).json({
-        error: 'Security Safeguard: Demonstration login is disabled in production environments. Please authenticate with valid organizational credentials.',
+    const { role = 'compliance_officer' } = req.body || {};
+    const validRoles = ['compliance_officer', 'brand_manager', 'content_creator', 'admin'];
+
+    if (!validRoles.includes(role)) {
+      res.status(400).json({
+        error: `Invalid demonstration role "${role}". Must be one of: ${validRoles.join(', ')}`,
       });
       return;
     }
 
-    const { role = 'admin' } = req.body;
-
-    const userRes = await db.query(
-      `SELECT u.*, o.name as org_name, o.plan as org_plan
-       FROM users u
-       JOIN organizations o ON u.org_id = o.id
-       WHERE u.role = $1
-       ORDER BY u.created_at ASC
-       LIMIT 1`,
-      [role]
-    );
-
-    if (userRes.rows.length === 0) {
-      res.status(404).json({ error: `No demonstration user found for role: ${role}` });
-      return;
-    }
-
-    const user = userRes.rows[0];
-    const token = jwt.sign(
-      { id: user.id, org_id: user.org_id, email: user.email, role: user.role, full_name: user.full_name },
-      config.jwtSecret,
-      { expiresIn: config.jwtExpiresIn as any }
-    );
+    const auth = await demoService.getDemoUserToken(role);
 
     await auditService.logEvent({
-      orgId: user.org_id,
-      userId: user.id,
+      orgId: auth.org.id,
+      userId: auth.user.id,
       action: 'DEMO_USER_LOGIN',
       resourceType: 'user',
-      resourceId: user.id,
-      details: { role: user.role, label: 'Demonstration Session' },
+      resourceId: auth.user.id,
+      details: { role: auth.user.role, label: 'Demonstration Session' },
       ipAddress: req.ip,
     });
 
-    const { password_hash, ...safeUser } = user;
     res.json({
-      token,
-      user: safeUser,
+      token: auth.token,
+      user: auth.user,
+      organization: auth.org,
     });
   } catch (err: any) {
     console.error('[Auth Demo Login Error]:', err);

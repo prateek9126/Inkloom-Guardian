@@ -37,31 +37,85 @@ app.use((_req: Request, res: Response, next: NextFunction) => {
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader(
     'Content-Security-Policy',
-    "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self'"
+    "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://*.vercel.app https://inkloom-guardian-server.vercel.app http://localhost:5000 http://127.0.0.1:5000"
   );
   next();
 });
 
-// Strict CORS Configuration
-const allowedOrigins = process.env.ALLOWED_ORIGINS
-  ? process.env.ALLOWED_ORIGINS.split(',').map((s) => s.trim())
-  : ['http://localhost:5173', 'http://localhost:5000', 'http://127.0.0.1:5173', 'http://127.0.0.1:5000'];
+// Explicit Allowed Origins (Defaulting to the production frontend and local dev environments)
+const explicitAllowedOrigins = [
+  'https://inkloom-guardian.vercel.app',
+  'https://inkloom-guardian-client.vercel.app',
+  'https://inkloom-guardian-server.vercel.app',
+  'http://localhost:5173',
+  'http://localhost:5000',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:5000',
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+];
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps, curl, server-to-server) or matching allowed list
-      if (!origin || allowedOrigins.includes(origin) || config.nodeEnv === 'development') {
-        callback(null, true);
-      } else {
-        callback(new Error('CORS policy: Not allowed by Access-Control-Allow-Origin'));
-      }
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  })
-);
+const envOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',').map((s) => s.trim().replace(/\/+$/, ''))
+  : [];
+
+export function isOriginAllowed(origin?: string): boolean {
+  if (!origin) return true; // allow non-browser clients (curl, mobile, server-to-server)
+  const clean = origin.trim().replace(/\/+$/, '');
+  if (explicitAllowedOrigins.includes(clean) || envOrigins.includes(clean) || envOrigins.includes('*')) {
+    return true;
+  }
+  // Allow all Vercel deployment domains (*.vercel.app) and local development
+  try {
+    const url = new URL(clean);
+    if (url.hostname.endsWith('.vercel.app') || url.hostname === 'localhost' || url.hostname === '127.0.0.1') {
+      return true;
+    }
+  } catch {
+    return false;
+  }
+  return false;
+}
+
+// 1. Direct Pre-Flight & CORS Middleware (ensures OPTIONS returns 204 immediately before any DB/auth logic)
+app.use((req: Request, res: Response, next: NextFunction) => {
+  const origin = req.headers.origin;
+  if (origin && isOriginAllowed(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+    res.setHeader('Access-Control-Max-Age', '86400');
+  }
+
+  // Preflight requests return immediately with 204 No Content
+  if (req.method === 'OPTIONS') {
+    res.status(204).end();
+    return;
+  }
+
+  next();
+});
+
+// 2. Standard CORS middleware for Express route handlers
+const corsOptions: cors.CorsOptions = {
+  origin: (origin, callback) => {
+    if (!origin || isOriginAllowed(origin)) {
+      callback(null, true);
+    } else {
+      callback(null, false);
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  exposedHeaders: ['Content-Disposition', 'Content-Length', 'X-Total-Count'],
+  optionsSuccessStatus: 204,
+  maxAge: 86400,
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 // NOTE: express-rate-limit package has been completely removed as requested.
 // Public API endpoints are served without external rate-limiting middleware.
@@ -93,6 +147,16 @@ app.use(async (_req: Request, _res: Response, next: NextFunction) => {
   } catch (err) {
     next(err);
   }
+});
+
+// Vercel Serverless Path Normalization Middleware
+// When Vercel rewrites requests to serverless functions, restore the original client path if rewritten
+app.use((req: Request, _res: Response, next: NextFunction) => {
+  const matchedPath = (req.headers['x-matched-path'] || req.headers['x-forwarded-uri'] || req.headers['x-original-uri']) as string;
+  if (matchedPath && (req.url === '/src/index.js' || req.url === '/src/index' || req.url === '/api' || req.url.startsWith('/src/index'))) {
+    req.url = matchedPath;
+  }
+  next();
 });
 
 // Serve uploaded attachments safely with security headers
@@ -142,6 +206,16 @@ app.use('/api/audit', auditRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/demo', demoRoutes);
 
+// Dedicated 404 Handler for /api/* to ensure API requests never fall through to static index.html
+app.all('/api/*', (req: Request, res: Response) => {
+  res.status(404).json({
+    error: `API endpoint not found: ${req.method} ${req.path}`,
+    method: req.method,
+    path: req.path,
+    status: 404,
+  });
+});
+
 // Serve Static Frontend (plain HTML/CSS/JS without build step, with fallback to dist if present)
 const possibleClientPaths = [
   path.resolve(__dirname, '../../client'),
@@ -165,10 +239,17 @@ for (const clientPath of possibleClientPaths) {
   }
 }
 
-// Global Error Handler with production sanitization
-app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+// Global Error Handler with guaranteed CORS headers on error responses
+app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
   console.error('[Inkloom Guardian Unhandled Error]:', err);
   const status = err.status || 500;
+
+  const origin = req.headers.origin;
+  if (origin && isOriginAllowed(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  }
+
   const safeMessage =
     config.nodeEnv === 'production' && status === 500
       ? 'An unexpected error occurred. The incident has been logged for security audit.'

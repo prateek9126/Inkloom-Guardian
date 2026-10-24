@@ -21,12 +21,20 @@ declare global {
 
 export function authenticate(req: Request, res: Response, next: NextFunction): void {
   const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  const queryToken = req.query?.token as string | undefined;
+
+  let token: string | undefined;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    token = authHeader.split(' ')[1];
+  } else if (queryToken) {
+    token = queryToken;
+  }
+
+  if (!token) {
     res.status(401).json({ error: 'Authentication required. No valid Bearer token provided.' });
     return;
   }
 
-  const token = authHeader.split(' ')[1];
   try {
     const decoded = jwt.verify(token, config.jwtSecret) as AuthenticatedUser;
     req.user = decoded;
