@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { db } from '../db/db.js';
 import { authenticate } from '../middleware/auth.js';
-import { upload, extractContentFromFile } from '../middleware/upload.js';
+import { upload, extractContentFromFile, contentUploadMiddleware } from '../middleware/upload.js';
 import { riskAnalysisService } from '../services/riskAnalysisService.js';
 import { auditService } from '../services/auditService.js';
 
@@ -64,14 +64,20 @@ router.get('/', authenticate, async (req: Request, res: Response) => {
 });
 
 /**
- * Submit content (supports text directly, or file upload: PDF, images, TXT)
+ * Submit content (supports text directly, or file upload: PDF, DOCX, images, TXT)
  */
-router.post('/', authenticate, upload.single('attachment'), async (req: Request, res: Response) => {
+router.post('/', authenticate, contentUploadMiddleware, async (req: Request, res: Response) => {
   try {
     const orgId = req.user!.org_id;
     const authorId = req.user!.id;
-    const { title, channel, campaign_id, auto_scan = 'true', submit_for_review = 'false' } = req.body;
-    let content_body = req.body.content_body || '';
+
+    // Normalize field names (supporting both snake_case and camelCase from any client version)
+    const title = (req.body.title || '').trim();
+    const channel = (req.body.channel || '').trim();
+    const rawCampaignId = req.body.campaign_id !== undefined ? req.body.campaign_id : req.body.campaignId;
+    const autoScanRaw = req.body.auto_scan !== undefined ? req.body.auto_scan : req.body.autoScan;
+    const submitForReviewRaw = req.body.submit_for_review !== undefined ? req.body.submit_for_review : req.body.submitForReview;
+    let content_body = (req.body.content_body || req.body.contentBody || '').trim();
 
     let file_attachment_url: string | null = null;
     let file_type: string | null = null;
@@ -81,17 +87,34 @@ router.post('/', authenticate, upload.single('attachment'), async (req: Request,
       file_type = req.file.mimetype;
 
       if (!content_body || content_body.trim().length === 0) {
-        content_body = await extractContentFromFile(req.file.path, req.file.originalname);
+        content_body = (await extractContentFromFile(req.file.path, req.file.originalname)).trim();
       }
     }
 
     if (!title || !channel || !content_body) {
-      res.status(400).json({ error: 'Title, channel, and content body (or document file) are required.' });
+      res.status(400).json({
+        error: 'Title, channel, and content body (or an attached document/image) are required.',
+        code: 'VALIDATION_FAILED',
+        missingFields: {
+          title: !title,
+          channel: !channel,
+          content_body: !content_body,
+        },
+      });
       return;
     }
 
-    const campaignIdVal = campaign_id && campaign_id !== 'none' && campaign_id !== '' ? campaign_id : null;
-    const initialStatus = submit_for_review === 'true' || submit_for_review === true ? 'ready_for_review' : 'draft';
+    const campaignIdVal =
+      rawCampaignId && rawCampaignId !== 'none' && rawCampaignId !== ''
+        ? String(rawCampaignId)
+        : null;
+
+    const initialStatus =
+      submitForReviewRaw === 'true' || submitForReviewRaw === true
+        ? 'ready_for_review'
+        : 'draft';
+
+    const autoScan = autoScanRaw === undefined || autoScanRaw === 'true' || autoScanRaw === true;
 
     const result = await db.query(
       `INSERT INTO content_submissions
@@ -103,10 +126,10 @@ router.post('/', authenticate, upload.single('attachment'), async (req: Request,
         orgId,
         campaignIdVal,
         authorId,
-        title.trim(),
-        channel.trim(),
-        content_body.trim(),
-        content_body.trim(),
+        title,
+        channel,
+        content_body,
+        content_body,
         file_attachment_url,
         file_type,
         initialStatus,
@@ -117,7 +140,7 @@ router.post('/', authenticate, upload.single('attachment'), async (req: Request,
 
     // Run automatic risk scan if requested
     let scanReport = null;
-    if (auto_scan === 'true' || auto_scan === true) {
+    if (autoScan) {
       try {
         scanReport = await riskAnalysisService.scanContent(submission.id, orgId, authorId, initialStatus === 'draft');
       } catch (scanErr: any) {
@@ -149,8 +172,12 @@ router.post('/', authenticate, upload.single('attachment'), async (req: Request,
       scanReport,
     });
   } catch (err: any) {
-    console.error('[Content Submit Error]:', err);
-    res.status(500).json({ error: 'Failed to create content submission: ' + err.message });
+    const requestId = (req.headers['x-request-id'] as string) || (req as any).id || 'req-' + Date.now();
+    console.error(`[Content Submit Error] [RequestId: ${requestId}]:`, err.message);
+    res.status(500).json({
+      error: 'Failed to create content submission: ' + err.message,
+      requestId,
+    });
   }
 });
 

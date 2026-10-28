@@ -2,11 +2,13 @@ import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import path from 'path';
 import fs from 'fs';
+import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 import { config } from './config/env.js';
 import { db } from './db/db.js';
 import { runMigrations } from './db/migrate.js';
 import { seedDatabase } from './db/seed.js';
+import { demoService } from './services/demoService.js';
 
 import authRoutes from './routes/authRoutes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
@@ -77,6 +79,16 @@ export function isOriginAllowed(origin?: string): boolean {
   return false;
 }
 
+// Request Correlation and Diagnostic Tracking Middleware
+app.use((req: Request, res: Response, next: NextFunction) => {
+  const incomingReqId = (req.headers['x-request-id'] || req.headers['x-correlation-id']) as string | undefined;
+  const correlationId = incomingReqId || `req_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
+  req.headers['x-request-id'] = correlationId;
+  res.setHeader('X-Request-Id', correlationId);
+  res.setHeader('X-Correlation-Id', correlationId);
+  next();
+});
+
 // 1. Direct Pre-Flight & CORS Middleware (ensures OPTIONS returns 204 immediately before any DB/auth logic)
 app.use((req: Request, res: Response, next: NextFunction) => {
   const origin = req.headers.origin;
@@ -84,7 +96,8 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, X-Request-Id, X-Correlation-Id');
+    res.setHeader('Access-Control-Expose-Headers', 'Content-Disposition, Content-Length, X-Total-Count, X-Request-Id, X-Correlation-Id');
     res.setHeader('Access-Control-Max-Age', '86400');
   }
 
@@ -108,8 +121,8 @@ const corsOptions: cors.CorsOptions = {
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
-  exposedHeaders: ['Content-Disposition', 'Content-Length', 'X-Total-Count'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'X-Request-Id', 'X-Correlation-Id'],
+  exposedHeaders: ['Content-Disposition', 'Content-Length', 'X-Total-Count', 'X-Request-Id', 'X-Correlation-Id'],
   optionsSuccessStatus: 204,
   maxAge: 86400,
 };
@@ -132,8 +145,9 @@ export async function initializeServices(): Promise<void> {
       console.log('[Inkloom Guardian] Initializing backend services...');
       await db.ensureReady();
       await runMigrations();
-      // Auto-seed demo data if DB is empty
+      // Auto-seed demo workspaces (both Acme and Volterra Demo) so all demo users exist across serverless workers
       await seedDatabase(false);
+      await demoService.seedVolterraDemo(false);
     })();
   }
   return initPromise;
@@ -239,15 +253,33 @@ for (const clientPath of possibleClientPaths) {
   }
 }
 
-// Global Error Handler with guaranteed CORS headers on error responses
+// Global Error Handler with guaranteed CORS headers, correlation IDs, and secure sanitized diagnostic logging
 app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
-  console.error('[Inkloom Guardian Unhandled Error]:', err);
-  const status = err.status || 500;
+  const correlationId = (req.headers['x-request-id'] || req.headers['x-correlation-id'] || `err_${Date.now()}`) as string;
+
+  let status = err.status || err.statusCode;
+  if (!status) {
+    if (err.name === 'MulterError' || err.type === 'entity.too.large' || err.code === 'LIMIT_FILE_SIZE') {
+      status = 400;
+    } else if (err.name === 'UnauthorizedError' || err.name === 'JsonWebTokenError') {
+      status = 401;
+    } else {
+      status = 500;
+    }
+  }
+
+  // Secure diagnostic logging: never log authorization tokens, user passwords, or raw uploaded files
+  console.error(`[Inkloom Guardian Error] [CorrelationId: ${correlationId}] [${req.method} ${req.path}] Status: ${status}:`, {
+    name: err.name || 'Error',
+    message: err.message || 'Unknown error',
+    code: err.code,
+  });
 
   const origin = req.headers.origin;
   if (origin && isOriginAllowed(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Expose-Headers', 'X-Request-Id, X-Correlation-Id');
   }
 
   const safeMessage =
@@ -257,6 +289,9 @@ app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
 
   res.status(status).json({
     error: safeMessage,
+    status,
+    correlationId,
+    code: err.code || (status === 500 ? 'INTERNAL_SERVER_ERROR' : 'REQUEST_ERROR'),
     ...(config.nodeEnv === 'development' ? { stack: err.stack } : {}),
   });
 });

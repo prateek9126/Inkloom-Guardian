@@ -147,7 +147,7 @@ window.NewSubmissionPageView = {
                 <input
                   id="sub-file"
                   type="file"
-                  accept=".txt,.md,.pdf,.png,.jpg,.jpeg"
+                  accept=".txt,.md,.pdf,.docx,.png,.jpg,.jpeg,.webp"
                   class="mt-1 block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200"
                 />
               </div>
@@ -219,12 +219,16 @@ window.NewSubmissionPageView = {
     const formData = new FormData();
     formData.append('title', title);
     formData.append('channel', channel);
+    formData.append('content_body', body);
     formData.append('contentBody', body);
+    formData.append('auto_scan', autoScan ? 'true' : 'false');
     formData.append('autoScan', autoScan ? 'true' : 'false');
-    if (campaignId !== 'none') {
+    if (campaignId && campaignId !== 'none') {
+      formData.append('campaign_id', campaignId);
       formData.append('campaignId', campaignId);
     }
     if (fileInput.files && fileInput.files[0]) {
+      formData.append('attachment', fileInput.files[0]);
       formData.append('file', fileInput.files[0]);
     }
 

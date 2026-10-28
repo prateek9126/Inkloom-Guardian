@@ -101,13 +101,28 @@ router.post('/login', async (req: Request, res: Response) => {
       return;
     }
 
-    const userRes = await db.query(
+    const cleanEmail = email.toLowerCase().trim();
+    let userRes = await db.query(
       `SELECT u.*, o.name as org_name, o.plan as org_plan
        FROM users u
        JOIN organizations o ON u.org_id = o.id
        WHERE LOWER(u.email) = LOWER($1)`,
-      [email.trim()]
+      [cleanEmail]
     );
+
+    // If user is not found, check if it's a known demo email and ensure workspace is seeded
+    if (userRes.rows.length === 0) {
+      if (cleanEmail.endsWith('@volterra.demo')) {
+        await demoService.seedVolterraDemo(false);
+        userRes = await db.query(
+          `SELECT u.*, o.name as org_name, o.plan as org_plan
+           FROM users u
+           JOIN organizations o ON u.org_id = o.id
+           WHERE LOWER(u.email) = LOWER($1)`,
+          [cleanEmail]
+        );
+      }
+    }
 
     if (userRes.rows.length === 0) {
       res.status(401).json({ error: 'Invalid email address or credentials.' });
@@ -193,7 +208,7 @@ router.post('/demo-login', async (req: Request, res: Response) => {
  */
 router.get('/me', authenticate, async (req: Request, res: Response) => {
   try {
-    const userRes = await db.query(
+    let userRes = await db.query(
       `SELECT u.id, u.org_id, u.email, u.full_name, u.role, u.created_at,
               o.name as org_name, o.slug as org_slug, o.plan as org_plan
        FROM users u
@@ -202,8 +217,31 @@ router.get('/me', authenticate, async (req: Request, res: Response) => {
       [req.user!.id]
     );
 
+    // If not found in current worker memory, attempt recovery for demo users across serverless cold starts
     if (userRes.rows.length === 0) {
-      res.status(404).json({ error: 'User profile not found.' });
+      const email = req.user?.email || '';
+      if (email.endsWith('@volterra.demo')) {
+        await demoService.seedVolterraDemo(false);
+      } else if (email.endsWith('@inkloom.enterprise')) {
+        await demoService.seedVolterraDemo(false);
+      }
+
+      // Re-query by ID or email
+      userRes = await db.query(
+        `SELECT u.id, u.org_id, u.email, u.full_name, u.role, u.created_at,
+                o.name as org_name, o.slug as org_slug, o.plan as org_plan
+         FROM users u
+         JOIN organizations o ON u.org_id = o.id
+         WHERE u.id = $1 OR LOWER(u.email) = LOWER($2)`,
+        [req.user!.id, email]
+      );
+    }
+
+    if (userRes.rows.length === 0) {
+      res.status(404).json({
+        error: 'User profile not found. Please log in again.',
+        code: 'USER_NOT_FOUND',
+      });
       return;
     }
 

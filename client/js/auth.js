@@ -70,8 +70,12 @@ class AuthManager {
       this.setUser(res.user);
       return res.user;
     } catch (err) {
-      console.warn('Session check failed, clearing token:', err.message);
-      this.logout();
+      console.warn('Session check warning:', err.message);
+      const msg = (err.message || '').toLowerCase();
+      // Only clear session token if authentication is explicitly rejected (401 or expired session)
+      if (msg.includes('401') || msg.includes('expired') || msg.includes('authentication required') || msg.includes('invalid or expired')) {
+        this.logout();
+      }
       return null;
     }
   }
